@@ -23,6 +23,7 @@
   "homepage": "https://github.com/artsoroka/flscanner#readme",
   "dependencies": {
     "bluebird": "^3.5.0",
+    "nedb": "^1.8.0",
     "request": "^2.81.0"
   }
 }

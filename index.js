@@ -1,9 +1,37 @@
-const vk = require('./lib/vk'); 
+const vk    = require('./lib/vk'); 
+const db    = require('./lib/db'); 
+const sleep = require('./lib/sleep'); 
 
-const groupId = process.env.FLSCANNER_GROUP_ID; 
-const topicId = process.env.FLSCANNER_TOPIC_ID; 
+(async () => {
+  const sources = await db.getSources(); 
+  var result = []; 
+  
+  for(source of sources){
+    
+    try{
+	  const posts = await vk.getComments(source.groupId, source.topicId);
+	  const newPosts = posts.filter(post => post.id > source.newestPostId); 
 
-vk
-  .getComments(groupId, topicId)
-  .then(comments => console.log(comments))
-  .catch(e => console.log('getComments failed with error: %s', e)); 
+	  console.log('sleeping...');
+	  await sleep(1000); 
+
+	  if( ! newPosts.length ) continue; 
+
+	  newestPostId = newPosts.reduce((acc, post) => {
+	  	if(post.id > acc) acc = post.id; 
+	  	return acc; 
+	  }, source.newestPostId); 
+
+	  result = result.concat(newPosts);   
+	  
+	  await db.updateSource(source._id, newestPostId); 
+	  
+	} catch(e){
+	  console.log('fetching data failed: ', e); 
+	}
+	  
+  } 
+  
+  console.log(result); 
+
+})(); 
